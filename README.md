@@ -1,40 +1,117 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+# User Data API System - Simple README Guide
 
-## Getting Started
+This project automatically collects user data every 5 minutes from the Random User API, stores it in a PostgreSQL database, and provides a REST API to access the data.
 
-First, run the development server:
+---
 
+## 📦 Tech Stack
+- Next.js (TypeScript)
+- PostgreSQL
+- Prisma ORM
+- Node Cron
+- Axios
+
+---
+
+## 🚀 How to Run This Project
+
+### 1. Clone and Install
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <repo-url>
+cd user-data-api
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Setup Environment
+Create a `.env` file:
+```env
+DATABASE_URL="postgresql://postgres:Nikita@123@localhost:5432/restapi"
+```
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+### 3. Setup Prisma and Database
+```bash
+npx prisma migrate dev --name init
+```
+To view data:
+```bash
+npx prisma studio
+```
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+### 4. Run the App
+```bash
+npm run dev
+```
+Every 5 minutes, 5 new users will be added automatically to the database.
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+##  How It Works (Step by Step)
 
-## Learn More
+### ✅ Step 1: Define Database Models
+File: `prisma/schema.prisma`
+```prisma
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  gender    String
+  createdAt DateTime @default(now())
+  location  Location?
+}
 
-To learn more about Next.js, take a look at the following resources:
+model Location {
+  id      String @id @default(uuid())
+  userId  String @unique
+  city    String
+  country String
+  user    User   @relation(fields: [userId], references: [id])
+}
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
+### ✅ Step 2: Fetch and Save Users Automatically
+File: `lib/fetchUsers.ts`
+```ts
+// Fetch 5 random users and save them in DB
+```
+File: `lib/cron.ts`
+```ts
+// Schedule fetch every 5 minutes
+```
+File: `pages/_app.tsx`
+```ts
+// Run cron only on server side
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### ✅ Step 3: API Endpoint - /api/users
+File: `pages/api/users.ts`
+```ts
+// GET /api/users
+// Supports:
+// - Filtering: ?gender=male&city=London
+// - Pagination: ?page=1&limit=5
+// - Field selection: ?fields=name,email
+```
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🔍 How to Test API
+Examples:
+- `/api/users` (Get all users)
+- `/api/users?gender=male` (Filter by gender)
+- `/api/users?page=2&limit=5` (Pagination)
+- `/api/users?fields=name,email` (Only return name + email)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
+---
+
+## ✅ Git Commit Examples
+```bash
+git commit -m "Setup Prisma schema for User and Location"
+git commit -m "Add cron job to fetch and store users every 5 minutes"
+git commit -m "Create API route /api/users with filtering and pagination"
+```
+
+---
+
+## ✅ Done!
+Let me know if you want to show users on a frontend page or deploy this to Vercel!
+
